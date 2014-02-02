@@ -23,7 +23,7 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 				"size": size,
 				"scrollBy": window.innerHeight,
 				"originalParams": {
-					"overflow": document.body.style.overflow,
+					"overflow": document.querySelector("html").style.overflow,
 					"scrollTop": document.documentElement.scrollTop
 				}
 			});
@@ -36,7 +36,7 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 
 			// first scrolling
 			if (request.scrollTo === 0) {
-				document.body.style.overflow = "hidden";
+				document.querySelector("html").style.overflow = "hidden";
 			}
 
 			// last scrolling
@@ -54,7 +54,7 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 
 		case "resetPage":
 			window.scrollTo(0, request.originalParams.scrollTop);
-			document.body.style.overflow = request.originalParams.overflow;
+			document.querySelector("html").style.overflow = request.originalParams.overflow;
 			break;
 	}
 });
