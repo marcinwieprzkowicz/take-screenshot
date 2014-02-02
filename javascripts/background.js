@@ -147,28 +147,4 @@ var takeScreenshot = {
 };
 
 
-// Ensure the current selected tab is set up.
-chrome.tabs.query({
-	active: true,
-	currentWindow: true
-}, function(tabs) {
-	if (takeScreenshot.tabId === null) {
-		takeScreenshot.initialize();
-	}
-});
-
-
-// onSelectionChanged
-chrome.tabs.onSelectionChanged.addListener(function(tabId, info) {
-	if (takeScreenshot.tabId === null) {
-		takeScreenshot.initialize();
-	}
-});
-
-
-// onUpdated
-chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
-	if (change.status === "complete" && takeScreenshot.tabId === null) {
-		takeScreenshot.initialize();
-	}
-});
+takeScreenshot.initialize();
