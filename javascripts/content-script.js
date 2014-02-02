@@ -1,3 +1,8 @@
+function resetPage(originalParams) {
+	window.scrollTo(0, originalParams.scrollTop);
+	document.querySelector("html").style.overflow = originalParams.overflow;
+}
+
 chrome.extension.onRequest.addListener(function (request, sender, callback) {
 	switch (request.msg) {
 		case "getPageDetails":
@@ -53,8 +58,20 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 			break;
 
 		case "resetPage":
-			window.scrollTo(0, request.originalParams.scrollTop);
-			document.querySelector("html").style.overflow = request.originalParams.overflow;
+			resetPage(request.originalParams);
+			break;
+
+		case "showError":
+			var errorEl = document.createElement("div");
+
+			errorEl.innerHTML = "<div style='position: absolute; top: 10px; right: 10px; z-index: 9999; padding: 8px; background-color: #fff2f2; border: 1px solid #f03e3e; border-radius: 2px; font-size: 12px; line-height: 16px; transition: opacity .3s linear;'>An internal error occurred while taking pictures.</div>";
+			document.body.appendChild(errorEl);
+
+			setTimeout(function () {
+				errorEl.firstChild.style.opacity = 0;
+			}, 3000);
+
+			resetPage(request.originalParams);
 			break;
 	}
 });

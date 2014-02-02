@@ -110,20 +110,27 @@ var takeScreenshot = {
 				var newWindow,
 					image = new Image();
 
-				image.onload = function() {
-					self.screenshotContext.drawImage(image, 0, position);
+				if (typeof dataURI !== "undefined") {
+					image.onload = function() {
+						self.screenshotContext.drawImage(image, 0, position);
 
-					if (lastCapture) {
-						self.resetPage();
-						newWindow = window.open();
-						newWindow.document.write("<style type='text/css'>body {margin: 0;}</style>");
-						newWindow.document.write("<img src='" + self.screenshotCanvas.toDataURL("image/png") + "'/>");
-					} else {
-						self.scrollTo(position + self.scrollBy);
-					}
-				};
+						if (lastCapture) {
+							self.resetPage();
+							newWindow = window.open();
+							newWindow.document.write("<style type='text/css'>body {margin: 0;}</style>");
+							newWindow.document.write("<img src='" + self.screenshotCanvas.toDataURL("image/png") + "'/>");
+						} else {
+							self.scrollTo(position + self.scrollBy);
+						}
+					};
 
-				image.src = dataURI;
+					image.src = dataURI;
+				} else {
+					chrome.tabs.sendRequest(self.tabId, {
+						"msg": "showError",
+						"originalParams": self.originalParams
+					});
+				}
 			});
 		}, 300);
 	},
@@ -140,4 +147,28 @@ var takeScreenshot = {
 };
 
 
-takeScreenshot.initialize();
+// Ensure the current selected tab is set up.
+chrome.tabs.query({
+	active: true,
+	currentWindow: true
+}, function(tabs) {
+	if (takeScreenshot.tabId === null) {
+		takeScreenshot.initialize();
+	}
+});
+
+
+// onSelectionChanged
+chrome.tabs.onSelectionChanged.addListener(function(tabId, info) {
+	if (takeScreenshot.tabId === null) {
+		takeScreenshot.initialize();
+	}
+});
+
+
+// onUpdated
+chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+	if (change.status === "complete" && takeScreenshot.tabId === null) {
+		takeScreenshot.initialize();
+	}
+});
