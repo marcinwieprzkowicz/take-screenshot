@@ -16,14 +16,13 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["http://*/*", "https://*/*"],
+			"matches": ["<all_urls>"],
 			"js": ["javascripts/content-script.js"]
 		}
 	],
 	"permissions": [
-		"tabs",
-		"http://*/",
-		"https://*/"
+        "activeTab",
+		"tabs"
 	],
 	"browser_action": {
 		"default_icon": {

@@ -3,7 +3,7 @@ function resetPage(originalParams) {
 	document.querySelector("html").style.overflow = originalParams.overflow;
 }
 
-chrome.extension.onRequest.addListener(function (request, sender, callback) {
+chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 	switch (request.msg) {
 		case "getPageDetails":
 			var size = {
@@ -23,7 +23,7 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 				)
 			};
 
-			chrome.extension.sendRequest({
+			chrome.extension.sendMessage({
 				"msg": "setPageDetails",
 				"size": size,
 				"scrollBy": window.innerHeight,
@@ -45,12 +45,12 @@ chrome.extension.onRequest.addListener(function (request, sender, callback) {
 			}
 
 			// last scrolling
-			if (request.size.height <= document.documentElement.scrollTop + request.scrollBy) {
+			if (request.size.height <= window.scrollY + request.scrollBy) {
 				lastCapture = true;
 				request.scrollTo = request.size.height - request.scrollBy;
 			}
 
-			chrome.extension.sendRequest({
+			chrome.extension.sendMessage({
 				"msg": "capturePage",
 				"position": request.scrollTo,
 				"lastCapture": lastCapture
