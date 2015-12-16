@@ -59,13 +59,13 @@ var takeScreenshot = {
 		chrome.browserAction.onClicked.addListener(function (tab) {
 			this.tabId = tab.id;
 
-			chrome.tabs.sendRequest(tab.id, {
+			chrome.tabs.sendMessage(tab.id, {
 				"msg": "getPageDetails"
 			});
 		}.bind(this));
 
 		// handle chrome requests
-		chrome.extension.onRequest.addListener(function (request, sender, callback) {
+		chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 			if (request.msg === "setPageDetails") {
 				this.size = request.size;
 				this.scrollBy = request.scrollBy;
@@ -87,7 +87,7 @@ var takeScreenshot = {
 	 * @param {Number} position
 	 */
 	scrollTo: function (position) {
-		chrome.tabs.sendRequest(this.tabId, {
+		chrome.tabs.sendMessage(this.tabId, {
 			"msg": "scrollPage",
 			"size": this.size,
 			"scrollBy": this.scrollBy,
@@ -126,7 +126,7 @@ var takeScreenshot = {
 
 					image.src = dataURI;
 				} else {
-					chrome.tabs.sendRequest(self.tabId, {
+					chrome.tabs.sendMessage(self.tabId, {
 						"msg": "showError",
 						"originalParams": self.originalParams
 					});
@@ -139,7 +139,7 @@ var takeScreenshot = {
 	 * @description Send request to set original params of page
 	 */
 	resetPage: function () {
-		chrome.tabs.sendRequest(this.tabId, {
+		chrome.tabs.sendMessage(this.tabId, {
 			"msg": "resetPage",
 			"originalParams": this.originalParams
 		});
