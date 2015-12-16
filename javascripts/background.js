@@ -126,7 +126,7 @@ var takeScreenshot = {
 
 					image.src = dataURI;
 				} else {
-                    chrome.tabs.sendMessage(self.tabId, {
+					chrome.tabs.sendMessage(self.tabId, {
 						"msg": "showError",
 						"originalParams": self.originalParams
 					});

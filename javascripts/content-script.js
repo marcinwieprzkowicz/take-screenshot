@@ -1,6 +1,6 @@
 function resetPage(originalParams) {
 	window.scrollTo(0, originalParams.scrollTop);
-	document.querySelector("html").style.overflow = originalParams.overflow;
+	document.querySelector("body").style.overflow = originalParams.overflow;
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, callback) {
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 				"size": size,
 				"scrollBy": window.innerHeight,
 				"originalParams": {
-					"overflow": document.querySelector("html").style.overflow,
+					"overflow": document.querySelector("body").style.overflow,
 					"scrollTop": document.documentElement.scrollTop
 				}
 			});
@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 
 			// first scrolling
 			if (request.scrollTo === 0) {
-				document.querySelector("html").style.overflow = "hidden";
+				document.querySelector("body").style.overflow = "hidden";
 			}
 
 			// last scrolling
