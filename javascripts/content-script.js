@@ -1,51 +1,102 @@
-function resetPage(originalParams) {
-	window.scrollTo(0, originalParams.scrollTop);
+function resetPageSettings(originalParams) {
+	setFixed(originalParams.fixed);
 	document.querySelector("body").style.overflow = originalParams.overflow;
+	window.scrollTo({top:originalParams.scrollTop, behavior:"auto"});
+	document.querySelector("html").style.scrollBehavior = originalParams.scrollBehavior;
+}
+
+function getPageSettings() {
+	return {
+		"scrollTop"     : document.documentElement.scrollTop,
+		"overflow"      : getComputedStyle(document.querySelector("body")).getPropertyValue("overflow"),
+		"scrollBehavior": getComputedStyle(document.querySelector("html")).getPropertyValue("scroll-behavior"),
+		"fixed"         : getFixed()
+	};
+}
+
+function setFixed(fixed) {
+	var elems = document.body.getElementsByTagName("*");
+	for (var i in fixed) {
+		elems[parseInt(i)].style.display = fixed[i];
+	}
+}
+
+function getFixed() {
+	var fixed = {};
+	var elems = document.body.getElementsByTagName("*");
+	for (var i = 0; i < elems.length; i++) {
+		var styles = getComputedStyle(elems[i]);
+		if (styles.getPropertyValue("position") == "fixed") {
+			fixed[i] = styles.getPropertyValue("display");
+		}
+	}
+	return fixed;
+}
+
+function hideFixed(fixed) {
+	var elems = document.body.getElementsByTagName("*");
+	for (var i in fixed) {
+		elems[parseInt(i)].style.display = "none";
+	}
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 	switch (request.msg) {
 		case "getPageDetails":
-			var size = {
-				width: Math.max(
-					document.documentElement.clientWidth,
-					document.body.scrollWidth,
-					document.documentElement.scrollWidth,
-					document.body.offsetWidth,
-					document.documentElement.offsetWidth
-				),
-				height: Math.max(
-					document.documentElement.clientHeight,
-					document.body.scrollHeight,
-					document.documentElement.scrollHeight,
-					document.body.offsetHeight,
-					document.documentElement.offsetHeight
-				)
-			};
+			var originalParams = getPageSettings();
+			if (request.hideFixedElems) {
+				hideFixed(originalParams.fixed);
+			}
+			document.querySelector("html").style.overflow = "hidden";
+			document.querySelector("html").style.scrollBehavior = "auto";
+			window.scrollTo({top:0, behavior:"auto"});
 
-			chrome.extension.sendMessage({
-				"msg": "setPageDetails",
-				"size": size,
-				"scrollBy": window.innerHeight,
-				"originalParams": {
-					"overflow": document.querySelector("body").style.overflow,
-					"scrollTop": document.documentElement.scrollTop
-				}
-			});
+			function setPageDetails() {
+				document.querySelector("html").style.scrollBehavior = "auto";
+				window.scrollTo({top:0, behavior:"auto"});
+
+				var size = {
+					width: Math.max(
+						document.documentElement.clientWidth,
+						document.body.scrollWidth,
+						document.documentElement.scrollWidth,
+						document.body.offsetWidth,
+						document.documentElement.offsetWidth
+					),
+					height: Math.max(
+						document.documentElement.clientHeight,
+						document.body.scrollHeight,
+						document.documentElement.scrollHeight,
+						document.body.offsetHeight,
+						document.documentElement.offsetHeight
+					)
+				};
+
+				chrome.extension.sendMessage({
+					"msg": "setPageDetails",
+					"size": size,
+					"scrollBy": window.innerHeight,
+					"originalParams": originalParams
+				});
+			}
+
+			if (request.prescrollPage) {
+				document.querySelector("html").style.scrollBehavior = "smooth";
+				window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"});
+				setTimeout(setPageDetails, 5000);
+			}
+			else {
+				setPageDetails();
+			}
 			break;
 
 		case "scrollPage":
 			var lastCapture = false;
 
-			window.scrollTo(0, request.scrollTo);
-
-			// first scrolling
-			if (request.scrollTo === 0) {
-				document.querySelector("body").style.overflow = "hidden";
-			}
+			window.scrollTo({top:request.scrollTo, behavior:"auto"});
 
 			// last scrolling
-			if (request.size.height <= window.scrollY + request.scrollBy) {
+			if (request.size.height <= Math.round(window.scrollY) + request.scrollBy) {
 				lastCapture = true;
 				request.scrollTo = request.size.height - request.scrollBy;
 			}
@@ -58,7 +109,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 			break;
 
 		case "resetPage":
-			resetPage(request.originalParams);
+			resetPageSettings(request.originalParams);
 			break;
 
 		case "showError":
@@ -71,7 +122,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 				errorEl.firstChild.style.opacity = 0;
 			}, 3000);
 
-			resetPage(request.originalParams);
+			resetPageSettings(request.originalParams);
 			break;
 	}
 });

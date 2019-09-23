@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Take screenshot",
-	"version": "1.0",
+	"version": "1.1",
 	"description": "Take screenshot of the entire web page",
 	"author": "marcin.wieprzkowicz@gmail.com",
 	"icons": {
@@ -21,8 +21,9 @@
 		}
 	],
 	"permissions": [
-        "activeTab",
-		"tabs"
+		"activeTab",
+		"tabs",
+		"contextMenus"
 	],
 	"browser_action": {
 		"default_icon": {

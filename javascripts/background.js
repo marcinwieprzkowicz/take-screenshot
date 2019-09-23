@@ -38,8 +38,22 @@ var takeScreenshot = {
 	 */
 	originalParams: {
 		overflow: "",
-		scrollTop: 0
+		scrollTop: 0,
+		scrollBehavior: "",
+		fixed: []
 	},
+
+	/**
+	 * @description: whether to hide elements with display=fixed
+	 * @type {Boolean}
+	 */
+	hideFixedElems: true,
+
+	/**
+	 * @description: whether to pre-scroll whole page (useful for late-loading ads)
+	 * @type {Boolean}
+	 */
+	prescrollPage: true,
 
 	/**
 	 * @description Initialize plugin
@@ -60,9 +74,29 @@ var takeScreenshot = {
 			this.tabId = tab.id;
 
 			chrome.tabs.sendMessage(tab.id, {
-				"msg": "getPageDetails"
+				msg: "getPageDetails",
+				hideFixedElems: this.hideFixedElems,
+				prescrollPage: this.prescrollPage
 			});
 		}.bind(this));
+
+		// handle options
+		chrome.contextMenus.create({
+			type: "checkbox",
+			id: "hideFixedElems",
+			title: "Hide fixed elements",
+			checked: true,
+			contexts: ["browser_action"],
+			onclick: this.contextMenuCallback.bind(this)
+		});
+		chrome.contextMenus.create({
+			type: "checkbox",
+			id: "prescrollPage",
+			title: "Pre-scroll through page",
+			checked: true,
+			contexts: ["browser_action"],
+			onclick: this.contextMenuCallback.bind(this)
+		});
 
 		// handle chrome requests
 		chrome.runtime.onMessage.addListener(function (request, sender, callback) {
@@ -112,7 +146,7 @@ var takeScreenshot = {
 
 				if (typeof dataURI !== "undefined") {
 					image.onload = function() {
-						self.screenshotContext.drawImage(image, 0, position);
+						self.screenshotContext.drawImage(image, 0, position, self.size['width'], self.scrollBy);
 
 						if (lastCapture) {
 							self.resetPage();
@@ -143,6 +177,22 @@ var takeScreenshot = {
 			"msg": "resetPage",
 			"originalParams": this.originalParams
 		});
+	},
+
+	/**
+	 * @description React to context menu
+	 * @param {Object} info
+	 */
+	contextMenuCallback: function (info) {
+		switch(info.menuItemId) {
+			case "hideFixedElems":
+				this.hideFixedElems = info.checked;
+				break;
+
+			case "prescrollPage":
+				this.prescrollPage = info.checked;
+				break;
+		}
 	}
 };
 
