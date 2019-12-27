@@ -12,5 +12,6 @@ Chrome extension to take screenshot of the entire web page
 
 ##Usage
 - Go to any web page
+- By default, plugin will hide DOM elements with `display=fixed` or `display=sticky` and will scroll through whole page once before taking the screenshot. You can control that by right-clicking the plugin icon ![plugin icon](https://raw2.github.com/marcinwieprzkowicz/take-screenshot/master/images/icon-19.png)
 - Click on plugin icon ![plugin icon](https://raw2.github.com/marcinwieprzkowicz/take-screenshot/master/images/icon-19.png)
 - Wait, until new tab will open with image
