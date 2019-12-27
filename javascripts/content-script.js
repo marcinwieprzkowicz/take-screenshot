@@ -15,9 +15,9 @@ function getPageSettings() {
 }
 
 function setFixed(fixed) {
-	var elems = document.body.getElementsByTagName("*");
 	for (var i in fixed) {
-		elems[parseInt(i)].style.display = fixed[i];
+		var elem = document.getElementById(i);
+		elem.style.display = fixed[i];
 	}
 }
 
@@ -26,17 +26,21 @@ function getFixed() {
 	var elems = document.body.getElementsByTagName("*");
 	for (var i = 0; i < elems.length; i++) {
 		var styles = getComputedStyle(elems[i]);
-		if (styles.getPropertyValue("position") == "fixed") {
-			fixed[i] = styles.getPropertyValue("display");
+		var position = styles.getPropertyValue("position");
+		if (['fixed', 'sticky', '-webkit-sticky'].indexOf(position) > -1) {
+			if (!elems[i].id) {
+				elems[i].id = Math.random().toString();
+			}
+			fixed[elems[i].id] = styles.getPropertyValue("display");
 		}
 	}
 	return fixed;
 }
 
 function hideFixed(fixed) {
-	var elems = document.body.getElementsByTagName("*");
 	for (var i in fixed) {
-		elems[parseInt(i)].style.display = "none";
+		var elem = document.getElementById(i);
+		elem.style.display = "none";
 	}
 }
 
@@ -47,7 +51,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
 			if (request.hideFixedElems) {
 				hideFixed(originalParams.fixed);
 			}
-			document.querySelector("html").style.overflow = "hidden";
+			document.querySelector("body").style.overflow = "hidden";
 			document.querySelector("html").style.scrollBehavior = "auto";
 			window.scrollTo({top:0, behavior:"auto"});
 
